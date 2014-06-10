@@ -17,6 +17,7 @@ public:
     grid(int const Width, int const Height, T const value = {})
       : width_  {Width}
       , height_ {Height}
+      , data_   {}
     {
         BK_ASSERT(width_ > 0 && height_ > 0);
         data_.resize(width_*height_, value);

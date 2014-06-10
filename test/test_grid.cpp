@@ -3,6 +3,9 @@
 
 #include <catch/catch.hpp>
 
+TEST_CASE("grid default initialization", "[grid]") {
+}
+
 TEST_CASE("grid can be initialized and cleared", "[grid]") {
     using grid_t = yama::grid<int>;
 
@@ -12,24 +15,19 @@ TEST_CASE("grid can be initialized and cleared", "[grid]") {
 
     grid_t grid {w, h, value};
 
-    auto const check_values = [](grid_t& grid, int const value) {
-        yama::for_each_xy(grid, [&](int x, int y, int val) {
+    auto const check_values = [](grid_t& g, int const check_value) {
+        yama::for_each_xy(g, [&](int x, int y, int val) {
             yama::grid_position_t const p {x, y};
 
-            REQUIRE(grid(p.x, p.y) == val);
-            REQUIRE(grid[p] == val);
-            REQUIRE(val == value);
+            REQUIRE(g(p.x, p.y) == val);
+            REQUIRE(g[p] == val);
+            REQUIRE(val == check_value);
         });
     };
 
     SECTION("dimensions") {
         REQUIRE(grid.width()  == w);
         REQUIRE(grid.height() == h);
-    }
-
-    SECTION("default value") {
-        grid_t grid {w, h};
-        check_values(grid, int {});
     }
 
     SECTION("chosen default value") {

@@ -10,6 +10,9 @@ using yama::rect_t;
 TEST_CASE("bsp_layout_regions", "[bsp_layout]") {
     yama::random_t random {1002};
 
+    for (int i = 0; i < 100; ++i) {
+        std::cout << yama::random_percent(random) << " ";
+    }
 
     bsp_layout_impl bsp {yama::bsp_layout::params_t {}};
 

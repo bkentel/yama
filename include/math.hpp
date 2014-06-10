@@ -5,6 +5,140 @@
 namespace yama {
 
 ////////////////////////////////////////////////////////////////////////////////
+//! A value type with a restriction applied to it.
+////////////////////////////////////////////////////////////////////////////////
+template <typename T, typename Restriction>
+class restricted_value {
+public:
+    static_assert(std::is_arithmetic<T>::value, "");
+
+    restricted_value(T const value = T{0})
+      : value_ { Restriction::apply(value) }
+    {
+        BK_ASSERT(Restriction::check(value));
+    }
+
+    bool operator<(T const rhs)  const { return value_ <  rhs; }
+    bool operator<=(T const rhs) const { return value_ <= rhs; }
+    bool operator>(T const rhs)  const { return value_ >  rhs; }
+    bool operator>=(T const rhs) const { return value_ >= rhs; }
+
+    restricted_value operator=(T const rhs) {
+        BK_ASSERT(Restriction::check(rhs));
+
+        value_ = Restriction::apply(rhs);
+        return *this;
+    }
+
+    restricted_value operator!=(T const rhs) {
+        return !(*this == rhs);
+    }
+
+    operator T() const { return value_; }
+private:
+    T value_;
+};
+
+namespace restriction {
+
+////////////////////////////////////////////////////////////////////////////////
+//! A value type restricted to [0, 100].
+////////////////////////////////////////////////////////////////////////////////
+struct restriction_percentage {
+    template <typename T>
+    static bool check(T const value) {
+        constexpr auto lower = T{0};
+        constexpr auto upper = T{100};
+
+        return value >= lower && value <= upper;
+    }
+
+    template <typename T>
+    static T apply(T const value) {
+        constexpr auto lower = T{0};
+        constexpr auto upper = T{100};
+
+        return value > upper ? upper : value < lower ? lower : value;
+    }
+};
+
+////////////////////////////////////////////////////////////////////////////////
+//! A value type restricted to be no less than @tparam Min.
+////////////////////////////////////////////////////////////////////////////////
+template <int Min>
+struct restriction_minimum {
+    template <typename T>
+    static bool check(T const value) {
+        constexpr auto lower = T{Min};
+        return value >= lower;
+    }
+
+    template <typename T>
+    static T apply(T const value) {
+        constexpr auto lower = T{Min};
+        return value < lower ? lower : value;
+    }
+};
+
+////////////////////////////////////////////////////////////////////////////////
+//! A value type restricted to greater than 1.
+////////////////////////////////////////////////////////////////////////////////
+struct restriction_aspect_ratio {
+    template <typename T>
+    static bool check(T const value) {
+        constexpr auto lower = T{1};
+        return value >= lower;
+    }
+
+    template <typename T>
+    static T apply(T const value) {
+        constexpr auto lower = T{1};
+        return value < lower ? lower : value;
+    }
+};
+
+} //namespace restriction;
+
+template <typename T>
+using positive = restricted_value<T, restriction::restriction_minimum<0>>;
+using aspect_ratio = restricted_value<float, restriction::restriction_aspect_ratio>;
+using percentage = restricted_value<int, restriction::restriction_percentage>;
+
+////////////////////////////////////////////////////////////////////////////////
+//! A closed integral interval.
+////////////////////////////////////////////////////////////////////////////////
+template <typename T = int>
+struct closed_integral_interval {
+    closed_integral_interval(T const Lower, T const Upper)
+      : lower {Lower}
+      , upper {Upper}
+    {
+        BK_ASSERT(lower <= upper);
+    }
+
+    bool contains(T const value) const {
+        return value >= lower && value <= upper;
+    }
+
+    T clamp(T const value) const {
+        return value < lower ? lower : value > upper ? upper : value;
+    }
+
+    T lower;
+    T upper;
+};
+
+template <typename T, typename U>
+inline bool operator<(U const lhs, closed_integral_interval<T> const rhs) {
+    return lhs < rhs.lower;
+}
+
+template <typename T, typename U>
+inline bool operator<(closed_integral_interval<T> const lhs, U const rhs) {
+    return lhs.upper < rhs;
+}
+
+////////////////////////////////////////////////////////////////////////////////
 //! 2d point
 ////////////////////////////////////////////////////////////////////////////////
 template <typename T = int>
