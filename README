@@ -1,0 +1,11 @@
+A rogue-like-like based in part on some of the ideas from Asheron's call.
+
+The core engine is to be written in c++11/14.
+The engine should strive to reduce compile time.
+The engine should strive to be understandable.
+
+The game should be cross platform.
+The game should support unicode / internationalization.
+The game should be modifiable.
+
+...
