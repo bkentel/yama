@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="yama" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug Win32">
+				<Option output="bin/yama_gcc_debug" prefix_auto="1" extension_auto="1" />
+				<Option object_output="build/.objs" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
+				<Compiler>
+					<Add option="-DWIN32" />
+					<Add option="-D_DEBUG" />
+					<Add option="-D_CONSOLE" />
+					<Add directory="include/" />
+				</Compiler>
+				<Linker>
+					<Add library="x86/SDL2.lib" />
+					<Add library="x86/SDL2main.lib" />
+				</Linker>
+			</Target>
+			<Target title="Test Win32">
+				<Option output="bin/yama_gcc_test" prefix_auto="1" extension_auto="1" />
+				<Option object_output="build/.objs" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
+				<Compiler>
+					<Add option="-DWIN32" />
+					<Add option="-D_DEBUG" />
+					<Add option="-D_CONSOLE" />
+					<Add directory="include/" />
+				</Compiler>
+				<Linker>
+					<Add library="sdl2main" />
+					<Add library="sdl2" />
+				</Linker>
+			</Target>
+			<Target title="Release Win32">
+				<Option output="bin/yama_gcc" prefix_auto="1" extension_auto="1" />
+				<Option object_output="build/.objs" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
+				<Compiler>
+					<Add option="-DWIN32" />
+					<Add option="-DNDEBUG" />
+					<Add option="-D_CONSOLE" />
+					<Add directory="include/" />
+				</Compiler>
+				<Linker>
+					<Add library="x86/SDL2.lib" />
+					<Add library="x86/SDL2main.lib" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Winvalid-pch" />
+		</Compiler>
+		<Unit filename="include/algorithm.hpp" />
+		<Unit filename="include/assert.hpp" />
+		<Unit filename="include/bsp_layout.hpp" />
+		<Unit filename="include/client.hpp" />
+		<Unit filename="include/commands.hpp" />
+		<Unit filename="include/config.hpp" />
+		<Unit filename="include/detail/bsp_layout_impl.hpp" />
+		<Unit filename="include/direction.hpp" />
+		<Unit filename="include/generate.hpp" />
+		<Unit filename="include/grid.hpp" />
+		<Unit filename="include/map.hpp" />
+		<Unit filename="include/math.hpp" />
+		<Unit filename="include/pch.hpp">
+			<Option compile="1" />
+			<Option weight="0" />
+		</Unit>
+		<Unit filename="include/random.hpp" />
+		<Unit filename="include/renderer.hpp" />
+		<Unit filename="include/tile.hpp" />
+		<Unit filename="include/types.hpp" />
+		<Unit filename="src/assert.cpp" />
+		<Unit filename="src/bsp_layout.cpp" />
+		<Unit filename="src/client.cpp">
+			<Option target="Debug Win32" />
+			<Option target="Release Win32" />
+		</Unit>
+		<Unit filename="src/generate.cpp" />
+		<Unit filename="src/main.cpp">
+			<Option target="Debug Win32" />
+			<Option target="Release Win32" />
+		</Unit>
+		<Unit filename="src/map.cpp" />
+		<Unit filename="src/pch.cpp" />
+		<Unit filename="src/renderer.cpp" />
+		<Unit filename="test/test_bsp_layout.cpp" />
+		<Unit filename="test/test_generate.cpp" />
+		<Unit filename="test/test_grid.cpp" />
+		<Unit filename="test/test_main.cpp">
+			<Option target="Test Win32" />
+		</Unit>
+		<Unit filename="test/test_math.cpp" />
+		<Extensions>
+			<DoxyBlocks>
+				<comment_style block="1" line="1" />
+				<doxyfile_project output_directory="doc" />
+				<doxyfile_build />
+				<doxyfile_warnings />
+				<doxyfile_output />
+				<doxyfile_dot />
+				<general />
+			</DoxyBlocks>
+			<code_completion />
+			<envvars />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
