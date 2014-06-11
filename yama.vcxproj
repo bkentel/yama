@@ -72,7 +72,7 @@
       <PrecompiledHeaderFile>pch.hpp</PrecompiledHeaderFile>
       <CompileAs>CompileAsCpp</CompileAs>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <AdditionalIncludeDirectories>include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <TargetMachine>MachineX86</TargetMachine>
@@ -94,7 +94,7 @@
       <PrecompiledHeaderFile>pch.hpp</PrecompiledHeaderFile>
       <CompileAs>CompileAsCpp</CompileAs>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <AdditionalIncludeDirectories>include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include\</AdditionalIncludeDirectories>
       <MinimalRebuild>false</MinimalRebuild>
     </ClCompile>
     <Link>
@@ -117,7 +117,7 @@
       <CompileAs>CompileAsCpp</CompileAs>
       <MinimalRebuild>true</MinimalRebuild>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <AdditionalIncludeDirectories>include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <TargetMachine>MachineX86</TargetMachine>
@@ -132,6 +132,7 @@
     <ClCompile Include="src\assert.cpp" />
     <ClCompile Include="src\bsp_layout.cpp" />
     <ClCompile Include="src\client.cpp" />
+    <ClCompile Include="src\engine.cpp" />
     <ClCompile Include="src\generate.cpp" />
     <ClCompile Include="src\main.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">true</ExcludedFromBuild>
@@ -177,9 +178,12 @@
     <ClInclude Include="include\commands.hpp" />
     <ClInclude Include="include\config.hpp" />
     <ClInclude Include="include\detail\bsp_layout_impl.hpp" />
+    <ClInclude Include="include\detail\engine_impl.hpp" />
     <ClInclude Include="include\direction.hpp" />
+    <ClInclude Include="include\engine.hpp" />
     <ClInclude Include="include\generate.hpp" />
     <ClInclude Include="include\grid.hpp" />
+    <ClInclude Include="include\level.hpp" />
     <ClInclude Include="include\map.hpp" />
     <ClInclude Include="include\math.hpp" />
     <ClInclude Include="include\pch.hpp" />
@@ -187,6 +191,7 @@
     <ClInclude Include="include\renderer.hpp" />
     <ClInclude Include="include\tile.hpp" />
     <ClInclude Include="include\types.hpp" />
+    <ClInclude Include="include\world.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="math.natvis" />

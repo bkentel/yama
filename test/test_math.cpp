@@ -3,6 +3,32 @@
 
 #include <catch/catch.hpp>
 
+TEST_CASE("closed_integral_interval", "[interval][point2d]") {
+    constexpr int lower = 1;
+    constexpr int upper = 10;
+
+    yama::closed_integral_interval<> const interval {lower, upper};
+
+    REQUIRE(interval.lower == lower);
+    REQUIRE(interval.upper == upper);
+
+    REQUIRE((lower - 1) <  interval);
+    REQUIRE(lower       <= interval);
+    REQUIRE((upper + 1) >  interval);
+    REQUIRE(upper       >= interval);
+
+    for (int i = lower; i <= upper; ++i) {
+        REQUIRE(interval.contains(i));
+    }
+
+    REQUIRE(interval.clamp(lower - 1) == lower);
+    REQUIRE(interval.clamp(upper + 1) == upper);
+
+    for (int i = lower; i <= upper; ++i) {
+        REQUIRE(interval.clamp(i) == i);
+    }
+}
+
 TEST_CASE("points are initialized", "[math][point2d]") {
     constexpr int x = 1;
     constexpr int y = 2;

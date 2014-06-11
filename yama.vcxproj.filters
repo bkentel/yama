@@ -50,6 +50,9 @@
     <ClCompile Include="test\test_math.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\engine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\algorithm.hpp">
@@ -101,6 +104,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\detail\bsp_layout_impl.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\level.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\world.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\engine.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\detail\engine_impl.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

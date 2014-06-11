@@ -16,7 +16,7 @@ TEST_CASE("bsp_layout_regions", "[bsp_layout]") {
 
     bsp_layout_impl bsp {yama::bsp_layout::params_t {}};
 
-for(int i = 0; i < 100; ++i) {
+//for(int i = 0; i < 100; ++i) {
     auto const test_map = bsp.generate(random);
 
     auto const w = test_map.width();
@@ -42,5 +42,5 @@ for(int i = 0; i < 100; ++i) {
     }
 
     bsp.clear();
-}
+//}
 }

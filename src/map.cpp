@@ -51,7 +51,7 @@ map& map::operator=(map&& rhs) {
     return *this;
 }
 
-map::map(int const Width, int const Height)
+map::map(yama::map_size const Width, yama::map_size const Height)
   : impl_ {std::make_unique<impl_t>(Width, Height)}
 {
 }

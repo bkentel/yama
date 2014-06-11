@@ -32,7 +32,7 @@ bsp_layout_impl::bsp_layout_impl(params_t const Params)
   : params_ {validate(Params)}
   , nodes_ {}
   , rooms_ {}
-  , map_ {params_.map_w, params_.map_h}
+  , map_ (params_.map_w, params_.map_h)
 {
 }
 //------------------------------------------------------------------------------

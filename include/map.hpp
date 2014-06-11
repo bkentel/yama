@@ -1,29 +1,37 @@
 #pragma once
 
 #include "tile.hpp"
+#include "math.hpp"
 
 namespace yama {
-
-namespace detail {
 
 enum class map_property {
     category, room_id, texture_id
 };
 
-template <map_property P>
-struct map_property_return_type;
+namespace detail {
 
-template <> struct map_property_return_type<map_property::category> {
+template <map_property P> struct property_mapping;
+
+template <>
+struct property_mapping<map_property::category> {
+    static auto const property = map_property::category;
     using type = tile_category;
 };
 
 } //namespace detail
 
+static constexpr int map_min_size = 10;
+using map_size = restricted_value<int, restriction::restriction_minimum<map_min_size>>;
+
 class map {
 public:
-    using property = detail::map_property;
+    using property = map_property;
 
-    map(int width, int height);
+    template <map_property Property>
+    using mapping_t = typename detail::property_mapping<Property>::type;
+
+    map(map_size width, map_size height);
     ~map();
 
     map(map&& other);
@@ -31,23 +39,27 @@ public:
 
     void clear();
 
-    template <property P, typename R>
-    void set(int x, int y, R value);
-
-    template <property P, typename R>
-    void set(grid_position_t p, R value);
-
+    //!
     template <property P>
-    typename detail::map_property_return_type<P>::type
-    get(int x, int y) const;
+    void set(int x, int y, mapping_t<P> value);
 
+    //!
     template <property P>
-    typename detail::map_property_return_type<P>::type
-    get(grid_position_t p) const;
+    void set(grid_position_t p, mapping_t<P> value);
 
+    //!
+    template <property P>
+    mapping_t<P> get(int x, int y) const;
+
+    //!
+    template <property P>
+    mapping_t<P> get(grid_position_t p) const;
+
+    //!
     bool is_valid_position(int x, int y) const;
 
-    bool is_valid_position(grid_position_t p) const {
+    //!
+    bool is_valid_position(grid_position_t const p) const {
         return is_valid_position(p.x, p.y);
     }
 
@@ -62,19 +74,19 @@ private:
 };
 
 template <>
-inline void map::set<map::property::category, tile_category>(int const x, int const y, tile_category const value) {
+inline void map::set<map_property::category>(int const x, int const y, tile_category const value) {
     set_category_(x, y, value);
 }
 
 template <>
-tile_category
-inline map::get<map::property::category>(int const x, int const y) const {
+inline tile_category
+map::get<map_property::category>(int const x, int const y) const {
     return get_category_(x, y);
 }
 
 template <>
-tile_category
-inline map::get<map::property::category>(grid_position_t const p) const {
+inline tile_category
+map::get<map_property::category>(grid_position_t const p) const {
     return get_category_(p.x, p.y);
 }
 

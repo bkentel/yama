@@ -24,8 +24,8 @@ public:
 
         params_t() {}
 
-        map_size map_w {150}; //!< Generated map width.
-        map_size map_h {75};  //!< Generated map height.
+        map_size map_w {64}; //!< Generated map width.
+        map_size map_h {64};  //!< Generated map height.
 
         interval room_w_range {4, 25}; //!< The min/max range for room width.
         interval room_h_range {4, 25}; //!< The min/max range for room height.
@@ -39,7 +39,7 @@ public:
 
         interval corridor_segment_length_range {2, 10};
 
-        percentage room_generation_chance {50};
+        percentage room_generation_chance {25};
         percentage region_split_chance {25};
 
         //! The aspect ratio threshhold to decide how to split a rect.

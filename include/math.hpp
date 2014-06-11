@@ -1,3 +1,7 @@
+////////////////////////////////////////////////////////////////////////////////
+//! @file
+//! Mathematical functions and types.
+////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
 #include "assert.hpp"
@@ -5,44 +9,71 @@
 namespace yama {
 
 ////////////////////////////////////////////////////////////////////////////////
+//! clamp @p value to [@p min, @p max].
+////////////////////////////////////////////////////////////////////////////////
+template <typename T>
+inline T clamp(T const value, T const min, T const max) {
+    return value < min ? min : value > max ? max : value;
+}
+
+////////////////////////////////////////////////////////////////////////////////
 //! A value type with a restriction applied to it.
+//!
+//! @tparam T           An arithmetic type.
+//! @tparam Restriction A type which models
+//!~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+//!struct restriction {
+//!    static bool check(T);
+//!    static T    apply(T);
+//!};
+//!~~~~~~~~~~~~~~~~~~~~~~~~~~
 ////////////////////////////////////////////////////////////////////////////////
 template <typename T, typename Restriction>
 class restricted_value {
 public:
-    static_assert(std::is_arithmetic<T>::value, "");
+    using value_type = T;
+    static_assert(std::is_arithmetic<value_type>::value, "");
 
-    restricted_value(T const value = T{0})
+    restricted_value(value_type const value = value_type{0})
       : value_ { Restriction::apply(value) }
     {
         BK_ASSERT(Restriction::check(value));
     }
 
-    bool operator<(T const rhs)  const { return value_ <  rhs; }
-    bool operator<=(T const rhs) const { return value_ <= rhs; }
-    bool operator>(T const rhs)  const { return value_ >  rhs; }
-    bool operator>=(T const rhs) const { return value_ >= rhs; }
+    //! Construct from a differently restricted value and apply this
+    //! restriction.
+    template <typename R>
+    restricted_value(restricted_value<T, R> const value)
+      : restricted_value {static_cast<T>(value)}
+    {
+    }
 
-    restricted_value operator=(T const rhs) {
+    bool operator<(value_type const rhs)  const { return value_ <  rhs; }
+    bool operator<=(value_type const rhs) const { return value_ <= rhs; }
+    bool operator>(value_type const rhs)  const { return value_ >  rhs; }
+    bool operator>=(value_type const rhs) const { return value_ >= rhs; }
+    bool operator==(value_type const rhs) const { return value_ == rhs; }
+    bool operator!=(value_type const rhs) const { return value_ != rhs; }
+
+    restricted_value operator=(value_type const rhs) {
         BK_ASSERT(Restriction::check(rhs));
 
         value_ = Restriction::apply(rhs);
         return *this;
     }
 
-    restricted_value operator!=(T const rhs) {
-        return !(*this == rhs);
-    }
-
-    operator T() const { return value_; }
+    operator value_type() const { return value_; }
 private:
-    T value_;
+    value_type value_;
 };
 
+////////////////////////////////////////////////////////////////////////////////
+//! Value restrictions for use with restricted_value.
+////////////////////////////////////////////////////////////////////////////////
 namespace restriction {
 
 ////////////////////////////////////////////////////////////////////////////////
-//! A value type restricted to [0, 100].
+//! A value restricted to [0, 100].
 ////////////////////////////////////////////////////////////////////////////////
 struct restriction_percentage {
     template <typename T>
@@ -63,7 +94,7 @@ struct restriction_percentage {
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-//! A value type restricted to be no less than @tparam Min.
+//! A value restricted to be no less than Min.
 ////////////////////////////////////////////////////////////////////////////////
 template <int Min>
 struct restriction_minimum {
@@ -81,7 +112,7 @@ struct restriction_minimum {
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-//! A value type restricted to greater than 1.
+//! A value type restricted to greater than 1.0.
 ////////////////////////////////////////////////////////////////////////////////
 struct restriction_aspect_ratio {
     template <typename T>
@@ -99,16 +130,39 @@ struct restriction_aspect_ratio {
 
 } //namespace restriction;
 
-template <typename T>
+template <typename T = int>
 using positive = restricted_value<T, restriction::restriction_minimum<0>>;
 using aspect_ratio = restricted_value<float, restriction::restriction_aspect_ratio>;
 using percentage = restricted_value<int, restriction::restriction_percentage>;
 
+namespace detail {
+
+template <typename T, bool Fundamental> struct get_value_type;
+
+template <typename T> struct get_value_type<T, true> {
+    using type = T;
+};
+
+template <typename T> struct get_value_type<T, false> {
+    using type = typename T::value_type;
+};
+
+} //namespace detail
+
+template <typename T>
+using get_value_type_t = typename detail::get_value_type<T, std::is_fundamental<T>::value>::type;
+
 ////////////////////////////////////////////////////////////////////////////////
 //! A closed integral interval.
+//!
+//! @tparam T An integral type.
 ////////////////////////////////////////////////////////////////////////////////
 template <typename T = int>
 struct closed_integral_interval {
+    using value_type = get_value_type_t<T>;
+
+    static_assert(std::is_integral<value_type>::value, "");
+
     closed_integral_interval(T const Lower, T const Upper)
       : lower {Lower}
       , upper {Upper}
@@ -121,25 +175,63 @@ struct closed_integral_interval {
     }
 
     T clamp(T const value) const {
-        return value < lower ? lower : value > upper ? upper : value;
+        return yama::clamp(value, lower, upper);
     }
 
     T lower;
     T upper;
 };
 
-template <typename T, typename U>
-inline bool operator<(U const lhs, closed_integral_interval<T> const rhs) {
+template <typename T>
+inline bool operator<(get_value_type_t<T> const lhs, closed_integral_interval<T> const rhs) {
     return lhs < rhs.lower;
 }
 
 template <typename T, typename U>
-inline bool operator<(closed_integral_interval<T> const lhs, U const rhs) {
-    return lhs.upper < rhs;
+inline bool operator<(closed_integral_interval<T> const lhs, get_value_type_t<T> const rhs) {
+    return rhs < lhs;
+}
+
+template <typename T>
+inline bool operator<=(get_value_type_t<T> const lhs, closed_integral_interval<T> const rhs) {
+    return lhs <= rhs.lower;
+}
+
+template <typename T, typename U>
+inline bool operator<=(closed_integral_interval<T> const lhs, get_value_type_t<T> const rhs) {
+    return rhs <= lhs;
+}
+
+template <typename T>
+inline bool operator>(get_value_type_t<T> const lhs, closed_integral_interval<T> const rhs) {
+    return lhs > rhs.upper;
+}
+
+template <typename T, typename U>
+inline bool operator>(closed_integral_interval<T> const lhs, get_value_type_t<T> const rhs) {
+    return rhs > lhs;
+}
+
+template <typename T>
+inline bool operator>=(get_value_type_t<T> const lhs, closed_integral_interval<T> const rhs) {
+    return lhs >= rhs.upper;
+}
+
+template <typename T, typename U>
+inline bool operator>=(closed_integral_interval<T> const lhs, get_value_type_t<T> const rhs) {
+    return rhs >= lhs;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-//! 2d point
+//! clamp @p value to @p range.
+////////////////////////////////////////////////////////////////////////////////
+template <typename T>
+inline T clamp(T const value, closed_integral_interval<T> const range) {
+    return range.clamp(value);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//! A two-dimensional point.
 ////////////////////////////////////////////////////////////////////////////////
 template <typename T = int>
 struct point2d {
@@ -161,7 +253,7 @@ bool operator!=(point2d<T> const p, point2d<T> const q) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-//! 2d vector
+//! A two-dimensional vector.
 ////////////////////////////////////////////////////////////////////////////////
 template <typename T = int>
 struct vector2d {
@@ -201,7 +293,7 @@ inline vector2d<T> operator*(T const c, vector2d<T> const v) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-//! axis aligned rectangle
+//! An axis-aligned rectangle.
 ////////////////////////////////////////////////////////////////////////////////
 template <typename T = int>
 struct axis_aligned_rect {
@@ -270,22 +362,5 @@ template <typename T>
 bool operator!=(axis_aligned_rect<T> const a, axis_aligned_rect<T> const b) {
     return !(a == b);
 }
-
-
-////////////////////////////////////////////////////////////////////////////////
-//! clamp value to [min, max]
-////////////////////////////////////////////////////////////////////////////////
-template <typename T>
-inline T clamp(T value, T min, T max) {
-    return value < min ? min : value > max ? max : value;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-//! 2d line segment
-////////////////////////////////////////////////////////////////////////////////
-template <typename T = int>
-struct line2d {
-    T x0, y0, x1, y1;
-};
 
 } //namespace yama

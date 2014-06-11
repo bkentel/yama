@@ -25,6 +25,5 @@ using random_t = std::mt19937;
 using rect_t          = yama::axis_aligned_rect<int>;
 using point_t         = yama::point2d<int>;
 using grid_position_t = yama::point2d<int>;
-using line_t          = yama::line2d<int>;
 
 } //namespace yama
