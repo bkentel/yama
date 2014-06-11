@@ -5,16 +5,13 @@ using namespace yama;
 
 //==============================================================================
 rect_t
-generate::rect(
-    random_t&       random
-  , rect_t    const bounds
-  , int       const min_w
-  , int       const min_h
+generate::bounded_rect(
+    random_t&           random
+  , rect_t        const bounds
+  , positive<int> const min_w
+  , positive<int> const min_h
 ) {
     BK_ASSERT(bounds);
-
-    BK_ASSERT(min_w >= 0);
-    BK_ASSERT(min_h >= 0);
 
     auto const w = bounds.width();
     auto const h = bounds.height();
@@ -33,13 +30,44 @@ generate::rect(
     return {left, top, right, bottom};
 }
 //==============================================================================
-point_t generate::point(
+rect_t
+generate::bounded_rect(
+    random_t&           random
+  , rect_t              bounds
+  , positive<int> const min_w
+  , positive<int> const min_h
+  , int           const size_weight
+  , positive<int> const border_size
+) {
+    bounds.left += border_size;
+    bounds.top  += border_size;
+
+    auto const max_w = bounds.width();
+    auto const weighted_max_w = std::max(
+        static_cast<int>(min_w)
+      , (max_w*(100 + size_weight)) / 100
+    );
+
+    auto const max_h = bounds.height();
+    auto const weighted_max_h = std::max(
+        static_cast<int>(min_h)
+      , (max_h*(100 + size_weight)) / 100
+    );
+
+    auto const w = std::min(max_w, random_uniform(random, min_w, weighted_max_w));
+    auto const h = std::min(max_h, random_uniform(random, min_h, weighted_max_h));
+
+    return generate::bounded_rect(random, bounds, w, h);
+}
+//==============================================================================
+point_t
+generate::point(
     random_t&       random
   , rect_t    const bounds
 ) {
     return {
-        random_uniform(random, bounds.left, bounds.right - 1)
-      , random_uniform(random, bounds.top, bounds.bottom - 1)
+        random_uniform(random, bounds.left, bounds.right  - 1)
+      , random_uniform(random, bounds.top,  bounds.bottom - 1)
     };
 }
 //==============================================================================

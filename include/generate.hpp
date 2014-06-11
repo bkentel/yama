@@ -1,7 +1,10 @@
+////////////////////////////////////////////////////////////////////////////////
+//! @file
+//! Random (procedural) generation.
+////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
 #include "types.hpp"
-#include "assert.hpp"
 #include "math.hpp"
 #include "random.hpp"
 
@@ -9,23 +12,45 @@ namespace yama {
 namespace generate {
 
 ////////////////////////////////////////////////////////////////////////////////
-//! @return A random rect.
+//! @return A random rect contained within @p bounds.
 //!
 //! @param random Random number generator.
 //! @param bounds Bounds that contain the resulting rect.
 //! @param min_w Minimum width of the resulting rect.
 //! @param min_h Minimum height of the resulting rect.
 //!
-//! @pre min_w >= 0.
-//! @pre min_h >= 0.
 //! @pre bounds is normalized.
 ////////////////////////////////////////////////////////////////////////////////
 rect_t
-rect(
-    random_t& random
-  , rect_t    bounds
-  , int       min_w
-  , int       min_h
+bounded_rect(
+    random_t&     random
+  , rect_t        bounds
+  , positive<int> min_w
+  , positive<int> min_h
+);
+
+////////////////////////////////////////////////////////////////////////////////
+//! @return A random rect contained within @p bounds.
+//!
+//! @param random Random number generator.
+//! @param bounds Bounds that contain the resulting rect.
+//! @param min_w Minimum width of the resulting rect.
+//! @param min_h Minimum height of the resulting rect.
+//! @param size_weight
+//!     Larger positive values generate larger average rects;
+//!     larger negative values generate smaller average rects.
+//! @param border_size Minimum height of the resulting rect.
+//!
+//! @pre bounds is normalized.
+////////////////////////////////////////////////////////////////////////////////
+rect_t
+bounded_rect(
+    random_t&     random
+  , rect_t        bounds
+  , positive<int> min_w
+  , positive<int> min_h
+  , int           size_weight
+  , positive<int> border_size = 0
 );
 
 ////////////////////////////////////////////////////////////////////////////////

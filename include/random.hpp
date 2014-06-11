@@ -18,9 +18,9 @@ inline auto random_uniform(
     return std::uniform_int_distribution<>{range.lower, range.upper}(random);
 }
 
-template <typename Random, typename T>
-inline T random_uniform(Random& random, T low, T hi) {
-    return std::uniform_int_distribution<T>{low, hi}(random);
+template <typename Random>
+inline int random_uniform(Random& random, int const low, int const hi) {
+    return std::uniform_int_distribution<>{low, hi}(random);
 }
 
 template <typename Random>

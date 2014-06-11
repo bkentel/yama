@@ -5,6 +5,8 @@
 #include "renderer.hpp"
 #include "engine.hpp"
 
+#include "checked_value.hpp"
+
 namespace yama {
 
 //class map {
@@ -85,7 +87,16 @@ namespace yama {
 ////////////////////////////////////////////////////////////////////////////////
 //! Entry point for the SDL application.
 ////////////////////////////////////////////////////////////////////////////////
+
+
 int SDL_main(int argc, char* argv[]) {
+    using value_t = yama::strict_percentage<>;
+
+    value_t x = 100;
+    value_t y = -100;
+
+    std::cout << x << " " << y << std::endl;
+
     yama::engine e;
 
     e.run();

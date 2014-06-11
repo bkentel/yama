@@ -19,8 +19,8 @@ public:
     //! BSP layout generation parameters.
     ////////////////////////////////////////////////////////////////////////////
     struct params_t {
-        using interval = closed_integral_interval<positive<int>>;
-        using map_size = restricted_value<int, restriction::restriction_minimum<10>>;
+        using interval = positive_interval;
+        using map_size = yama::map_size;
 
         params_t() {}
 
@@ -29,6 +29,10 @@ public:
 
         interval room_w_range {4, 25}; //!< The min/max range for room width.
         interval room_h_range {4, 25}; //!< The min/max range for room height.
+
+        //! Weight for the size of generated rooms.
+        //! Larger values generate larger rooms, smaller smaller.
+        int room_size_weight = 0;
 
         positive<int> border_size {0}; //!< The minimum spacing between regions.
 

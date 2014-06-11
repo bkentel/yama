@@ -182,6 +182,8 @@ struct closed_integral_interval {
     T upper;
 };
 
+using positive_interval = closed_integral_interval<positive<int>>;
+
 template <typename T>
 inline bool operator<(get_value_type_t<T> const lhs, closed_integral_interval<T> const rhs) {
     return lhs < rhs.lower;

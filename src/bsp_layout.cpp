@@ -155,26 +155,8 @@ bool bsp_layout_impl::do_generate_room(
 }
 //------------------------------------------------------------------------------
 yama::rect_t bsp_layout_impl::generate_room(random_t& random, yama::rect_t bounds) const {
-    auto const border = params_.border_size;
-
-    bounds.left += border;
-    bounds.top  += border;
-
-    int const min_w = params_.room_w_range.lower;
-    int const min_h = params_.room_h_range.lower;
-
-    int const max_w = bounds.width();
-    int const max_h = bounds.height();
-
-    int const weight = 90;
-
-    auto const weighted_max_w = std::max(min_w, (max_w*(100 + weight)) / 100);
-    auto const weighted_max_h = std::max(min_h, (max_h*(100 + weight)) / 100);
-
-    auto const w = std::min(max_w, random_uniform(random, min_w, weighted_max_w));
-    auto const h = std::min(max_h, random_uniform(random, min_h, weighted_max_h));
-
-    return generate::rect(random, bounds, w, h);
+    auto const& p = params_;
+    return generate::bounded_rect(random, bounds, p.room_w_range.lower, p.room_h_range.lower, p.room_size_weight, p.border_size);
 }
 //------------------------------------------------------------------------------
 void bsp_layout_impl::write_room(yama::rect_t const room) {
