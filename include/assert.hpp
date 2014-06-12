@@ -5,7 +5,8 @@
 namespace yama {
 
 #if BOOST_COMP_GNUC
-#define BK_DEBUG_BREAK [] { asm("int $3"); }
+inline void debug_break_function() { asm("int $3"); }
+#define BK_DEBUG_BREAK debug_break_function
 #elif BOOST_COMP_MSVC
 #define BK_DEBUG_BREAK __debugbreak
 #endif

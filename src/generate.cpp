@@ -42,26 +42,32 @@ generate::bounded_rect(
     bounds.left += border_size;
     bounds.top  += border_size;
 
+    auto const scaler = (100.0f + static_cast<float>(size_weight)) / 100.0f;
+
     auto const max_w = bounds.width();
+    auto const max_h = bounds.height();
+
     auto const weighted_max_w = std::max(
         static_cast<int>(min_w)
-      , (max_w*(100 + size_weight)) / 100
+      , static_cast<int>(max_w*scaler)
     );
 
-    auto const max_h = bounds.height();
     auto const weighted_max_h = std::max(
         static_cast<int>(min_h)
-      , (max_h*(100 + size_weight)) / 100
+      , static_cast<int>(max_h*scaler)
     );
 
-    auto const w = std::min(max_w, random_uniform(random, min_w, weighted_max_w));
-    auto const h = std::min(max_h, random_uniform(random, min_h, weighted_max_h));
+    auto w = random_uniform(random, min_w, weighted_max_w);
+    auto h = random_uniform(random, min_h, weighted_max_h);
+
+    w = std::min(w, max_w);
+    h = std::min(h, max_h);
 
     return generate::bounded_rect(random, bounds, w, h);
 }
 //==============================================================================
 point_t
-generate::point(
+generate::bounded_point(
     random_t&       random
   , rect_t    const bounds
 ) {

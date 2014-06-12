@@ -5,6 +5,9 @@
 
 namespace yama {
 
+static constexpr int map_min_size = 10;
+using map_size = checked_value<int, check_minimum<int, map_min_size>>;
+
 enum class map_property {
     category, room_id, texture_id
 };
@@ -20,9 +23,6 @@ struct property_mapping<map_property::category> {
 };
 
 } //namespace detail
-
-static constexpr int map_min_size = 10;
-using map_size = restricted_value<int, restriction::restriction_minimum<map_min_size>>;
 
 class map {
 public:
@@ -76,6 +76,11 @@ private:
 template <>
 inline void map::set<map_property::category>(int const x, int const y, tile_category const value) {
     set_category_(x, y, value);
+}
+
+template <>
+inline void map::set<map_property::category>(grid_position_t const p, tile_category const value) {
+    set_category_(p.x, p.y, value);
 }
 
 template <>

@@ -62,7 +62,7 @@ bounded_rect(
 //! @pre bounds is normalized.
 ////////////////////////////////////////////////////////////////////////////////
 point_t
-point(
+bounded_point(
     random_t& random
   , rect_t    bounds
 );

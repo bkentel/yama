@@ -34,7 +34,7 @@ public:
                 case category::floor:    r.set_color(200, 200, 200); break;
                 case category::door:     r.set_color(0, 0, 200); break;
                 case category::corridor: r.set_color(0, 100, 0); break;
-                case category::stair:    r.set_color(100, 100, 200); break;
+                case category::stair:    r.set_color(255, 0, 0); break;
                 case category::invalid:  r.set_color(100, 100, 200); break;
                 default:                 r.set_color(100, 100, 200); break;
                 }

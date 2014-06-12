@@ -42,29 +42,51 @@ void bsp_layout_impl::clear() {
     map_.clear();
 }
 //------------------------------------------------------------------------------
+
+namespace {
+yama::rect_t shrink_rect(yama::rect_t const r) {
+    BK_ASSERT(r.width()  >= 2);
+    BK_ASSERT(r.height() >= 2);
+
+    return {r.left + 1, r.top + 1, r.right - 1, r.bottom - 1};
+}
+}
+
 yama::map bsp_layout_impl::generate(random_t& random) {
     clear();
     nodes_.push_back(node {rect_t {0, 0, params_.map_w, params_.map_h}});
 
-    //each iteration can increase size()
-    for (size_t i = 0; i < nodes_.size(); ++i) {
-        split_node(random, nodes_[i]);
-    }
-
+    generate_tree(random);
     generate_rooms(random);
 
-    for (auto const& n : nodes_) {
-        if (n.is_leaf() && !n.is_empty()) {
-            write_room(rooms_[n.get_data()]);
-        }
+    for (auto const& room : rooms_) {
+        write_room(room);
     }
 
     connect(random, nodes_[0]);
+
+    auto const first_room = shrink_rect(rooms_.front());
+    auto const last_room  = shrink_rect(rooms_.back());
+
+    auto const p0 = generate::bounded_point(random, first_room);
+    auto const p1 = generate::bounded_point(random, last_room);
+
+    map_.set<map_property::category>(p0, tile_category::stair);
+    map_.set<map_property::category>(p1, tile_category::stair);
 
     auto result = std::move(map_);
     map_ = map {params_.map_w, params_.map_h};
 
     return result;
+}
+//------------------------------------------------------------------------------
+void bsp_layout_impl::generate_tree(random_t& random) {
+    BK_ASSERT(nodes_.size() == 1);
+
+    //each iteration can increase size()
+    for (size_t i = 0; i < nodes_.size(); ++i) {
+        split_node(random, nodes_[i]);
+    }
 }
 //------------------------------------------------------------------------------
 void bsp_layout_impl::split_node(random_t& random, node& n) {
@@ -108,7 +130,8 @@ void bsp_layout_impl::generate_rooms(random_t& random) {
 
         auto const room = generate_room(random, bounds);
 
-        std::cout << "room width=" << room.width() << " height=" << room.height() << std::endl;
+        std::cout << "reg  width=" << bounds.width() << " height=" << bounds.height()
+        << "\t\t-> room width=" << room.width()   << " height=" << room.height() << std::endl;
 
         rooms_.emplace_back(room);
         n.set_data(rooms_.size() - 1);
@@ -132,7 +155,7 @@ bool bsp_layout_impl::do_split(
     auto const float_w = static_cast<float>(w);
     auto const float_h = static_cast<float>(h);
 
-    aspect_ratio const ratio = (w >= h)
+    auto const ratio = (w >= h)
       ? (float_w / float_h)
       : (float_h / float_w);
 

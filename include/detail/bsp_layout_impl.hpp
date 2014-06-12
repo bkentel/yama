@@ -90,6 +90,9 @@ public:
     //! fill the bsp tree with rooms
     void generate_rooms(random_t& random);
 
+    //! create the bsp tree
+    void generate_tree(random_t& random);
+
     ////////////////////////////////////////////////////////////////////////////
     //! Connect two rects contained within bounds.
     ////////////////////////////////////////////////////////////////////////////

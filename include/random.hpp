@@ -32,7 +32,7 @@ inline bool random_bool(Random& random) {
 //! Roll a percentage [0, 100] -> 101 values
 ////////////////////////////////////////////////////////////////////////////////
 template <typename T = int, typename Random>
-inline percentage random_percent(Random& random) {
+inline int random_percent(Random& random) {
     return std::uniform_int_distribution<T>{0, 100}(random);
 }
 

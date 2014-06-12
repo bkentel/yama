@@ -6,6 +6,8 @@
 
 #include "assert.hpp"
 
+#include "checked_value.hpp"
+
 namespace yama {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -15,125 +17,6 @@ template <typename T>
 inline T clamp(T const value, T const min, T const max) {
     return value < min ? min : value > max ? max : value;
 }
-
-////////////////////////////////////////////////////////////////////////////////
-//! A value type with a restriction applied to it.
-//!
-//! @tparam T           An arithmetic type.
-//! @tparam Restriction A type which models
-//!~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-//!struct restriction {
-//!    static bool check(T);
-//!    static T    apply(T);
-//!};
-//!~~~~~~~~~~~~~~~~~~~~~~~~~~
-////////////////////////////////////////////////////////////////////////////////
-template <typename T, typename Restriction>
-class restricted_value {
-public:
-    using value_type = T;
-    static_assert(std::is_arithmetic<value_type>::value, "");
-
-    restricted_value(value_type const value = value_type{0})
-      : value_ { Restriction::apply(value) }
-    {
-        BK_ASSERT(Restriction::check(value));
-    }
-
-    //! Construct from a differently restricted value and apply this
-    //! restriction.
-    template <typename R>
-    restricted_value(restricted_value<T, R> const value)
-      : restricted_value {static_cast<T>(value)}
-    {
-    }
-
-    bool operator<(value_type const rhs)  const { return value_ <  rhs; }
-    bool operator<=(value_type const rhs) const { return value_ <= rhs; }
-    bool operator>(value_type const rhs)  const { return value_ >  rhs; }
-    bool operator>=(value_type const rhs) const { return value_ >= rhs; }
-    bool operator==(value_type const rhs) const { return value_ == rhs; }
-    bool operator!=(value_type const rhs) const { return value_ != rhs; }
-
-    restricted_value operator=(value_type const rhs) {
-        BK_ASSERT(Restriction::check(rhs));
-
-        value_ = Restriction::apply(rhs);
-        return *this;
-    }
-
-    operator value_type() const { return value_; }
-private:
-    value_type value_;
-};
-
-////////////////////////////////////////////////////////////////////////////////
-//! Value restrictions for use with restricted_value.
-////////////////////////////////////////////////////////////////////////////////
-namespace restriction {
-
-////////////////////////////////////////////////////////////////////////////////
-//! A value restricted to [0, 100].
-////////////////////////////////////////////////////////////////////////////////
-struct restriction_percentage {
-    template <typename T>
-    static bool check(T const value) {
-        constexpr auto lower = T{0};
-        constexpr auto upper = T{100};
-
-        return value >= lower && value <= upper;
-    }
-
-    template <typename T>
-    static T apply(T const value) {
-        constexpr auto lower = T{0};
-        constexpr auto upper = T{100};
-
-        return value > upper ? upper : value < lower ? lower : value;
-    }
-};
-
-////////////////////////////////////////////////////////////////////////////////
-//! A value restricted to be no less than Min.
-////////////////////////////////////////////////////////////////////////////////
-template <int Min>
-struct restriction_minimum {
-    template <typename T>
-    static bool check(T const value) {
-        constexpr auto lower = T{Min};
-        return value >= lower;
-    }
-
-    template <typename T>
-    static T apply(T const value) {
-        constexpr auto lower = T{Min};
-        return value < lower ? lower : value;
-    }
-};
-
-////////////////////////////////////////////////////////////////////////////////
-//! A value type restricted to greater than 1.0.
-////////////////////////////////////////////////////////////////////////////////
-struct restriction_aspect_ratio {
-    template <typename T>
-    static bool check(T const value) {
-        constexpr auto lower = T{1};
-        return value >= lower;
-    }
-
-    template <typename T>
-    static T apply(T const value) {
-        constexpr auto lower = T{1};
-        return value < lower ? lower : value;
-    }
-};
-
-} //namespace restriction;
-
-template <typename T = int>
-using positive = restricted_value<T, restriction::restriction_minimum<0>>;
-using aspect_ratio = restricted_value<float, restriction::restriction_aspect_ratio>;
-using percentage = restricted_value<int, restriction::restriction_percentage>;
 
 namespace detail {
 
