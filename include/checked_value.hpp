@@ -70,7 +70,9 @@ template <
 >
 class checked_value {
 public:
-    using value_type = T;
+    using value_type  = T;
+    using check_type  = Check;
+    static auto const policy_type = Policy;
 
     checked_value(T const value = T{})
       : value_ {value}
@@ -137,6 +139,11 @@ struct check_minimum : check_base<check_minimum<T, Minimum>> {
 ////////////////////////////////////////////////////////////////////////////////
 template <typename T, get_scalar_type_t<T> Minimum, get_scalar_type_t<T> Maximum>
 struct check_closed_range : check_base<check_closed_range<T, Minimum, Maximum>> {
+    enum : T {
+        minimum = Minimum
+      , maximum = Maximum
+    };
+
     static_assert(std::is_arithmetic<T>::value, "");
     static_assert(Minimum <= Maximum, "");
 
@@ -144,6 +151,13 @@ struct check_closed_range : check_base<check_closed_range<T, Minimum, Maximum>> 
     static bool check(U const& value) {
         return value >= U{Minimum} && value <= U{Maximum};
     }
+};
+
+template <typename T, get_scalar_type_t<T> Range>
+struct check_balanced_range : check_closed_range<T, -Range, Range> {
+    enum : T {
+        range = Range
+    };
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -166,5 +180,12 @@ using positive = checked_value<T, check_minimum<T, 0>>;
 ////////////////////////////////////////////////////////////////////////////////
 template <typename T = float>
 using aspect_ratio = checked_value<T, check_minimum<T, 1>>;
+
+////////////////////////////////////////////////////////////////////////////////
+//! A value in [-Range, Range]
+//! @tparam T The value type.
+////////////////////////////////////////////////////////////////////////////////
+template <typename T, get_scalar_type_t<T> Range>
+using closed_range = checked_value<T, check_balanced_range<T, Range>>;
 
 } //namespace yama;

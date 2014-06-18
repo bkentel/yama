@@ -25,11 +25,10 @@ public:
         map_size map_h {64};  //!< Generated map height.
 
         positive_interval room_w_range {4, 25}; //!< The min/max range for room width.
-        positive_interval room_h_range {4, 25}; //!< The min/max range for room height.
+        positive_interval room_h_range {4, 25}; //!< The min/max range for room height.       
 
-        //! Weight for the size of generated rooms.
-        //! Larger values generate larger rooms, smaller smaller.
-        int room_size_weight = -10000;
+        closed_range<int, 100> room_size_weight {0};
+        closed_range<int, 100> room_size_variance {0};
 
         positive<int> border_size {0}; //!< The minimum spacing between regions.
 
@@ -59,6 +58,8 @@ public:
     void set_params(params_t p = params_t {});
 
     map generate(random_t& random);
+
+    std::vector<rect_t> get_regions() const;
 private:
     class impl_t;
     std::unique_ptr<impl_t> impl_;

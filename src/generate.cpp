@@ -3,33 +3,91 @@
 
 using namespace yama;
 
+int generate::weighted_range(
+    random_t&                           random
+  , closed_integral_interval<int> const range
+  , closed_range<int, 100>        const weight
+  , closed_range<int, 100>        const variance
+) {
+    using T = double;
+
+    constexpr auto range_mean   = T{decltype(weight)::check_type::range};
+    constexpr auto range_stddev = T{decltype(variance)::check_type::range};
+
+    auto const mean   = ((weight   / range_mean)   + T{1}) / T{2};
+    auto const stddev = ((variance / range_stddev) + T{1}) / T{2};
+    auto       dist   = std::normal_distribution<T> {mean, stddev};
+    
+    auto const a           = static_cast<T>(range.lower);
+    auto const b           = static_cast<T>(range.upper);
+    auto const delta       = b - a;
+    auto const lower_limit = (T{0}  - T{0.5}) / delta;
+    auto const upper_limit = (delta + T{0.5}) / delta;
+
+    auto const in_range = [&](T const n) {
+        return n > lower_limit && n < upper_limit;
+    };
+
+    auto n = dist(random);
+    while (!in_range(n)) {
+        n = dist(random);
+    }
+
+    return static_cast<int>(std::round(a + delta * n));
+}
+
+//==============================================================================
+//rect_t
+//generate::bounded_rect(
+//    random_t&           random
+//  , rect_t        const bounds
+//  , positive<int> const min_w
+//  , positive<int> const min_h
+//) {
+//    BK_ASSERT(bounds);
+//
+//    auto const w = bounds.width();
+//    auto const h = bounds.height();
+//
+//    BK_ASSERT(w >= min_w);
+//    BK_ASSERT(h >= min_h);
+//
+//    auto const leeway_x = (w - min_w) / 2;
+//    auto const leeway_y = (h - min_h) / 2;
+//
+//    auto const left   = bounds.left   + random_uniform(random, 0, leeway_x);
+//    auto const top    = bounds.top    + random_uniform(random, 0, leeway_y);
+//    auto const right  = bounds.right  - random_uniform(random, 0, leeway_x);
+//    auto const bottom = bounds.bottom - random_uniform(random, 0, leeway_y);
+//
+//    return {left, top, right, bottom};
+//}
 //==============================================================================
 rect_t
 generate::bounded_rect(
     random_t&           random
   , rect_t        const bounds
-  , positive<int> const min_w
-  , positive<int> const min_h
+  , positive<int> const w
+  , positive<int> const h
 ) {
-    BK_ASSERT(bounds);
+    auto const max_w = bounds.width();
+    auto const max_h = bounds.height();
 
-    auto const w = bounds.width();
-    auto const h = bounds.height();
+    BK_ASSERT(w <= max_w);
+    BK_ASSERT(h <= max_h);
 
-    BK_ASSERT(w >= min_w);
-    BK_ASSERT(h >= min_h);
+    auto const leeway_x = max_w - w;
+    auto const leeway_y = max_h - h;
 
-    auto const leeway_x = (w - min_w) / 2;
-    auto const leeway_y = (h - min_h) / 2;
+    auto const dx = yama::random_uniform(random, 0, leeway_x);
+    auto const dy = yama::random_uniform(random, 0, leeway_y);
 
-    auto const left   = bounds.left   + random_uniform(random, 0, leeway_x);
-    auto const top    = bounds.top    + random_uniform(random, 0, leeway_y);
-    auto const right  = bounds.right  - random_uniform(random, 0, leeway_x);
-    auto const bottom = bounds.bottom - random_uniform(random, 0, leeway_y);
+    auto const left = bounds.left + dx;
+    auto const top  = bounds.top  + dy;
 
-    return {left, top, right, bottom};
+    return {left, top, left + w, top + h};
 }
-//==============================================================================
+
 rect_t
 generate::bounded_rect(
     random_t&           random
@@ -42,28 +100,10 @@ generate::bounded_rect(
     bounds.left += border_size;
     bounds.top  += border_size;
 
-    auto const scaler = (100.0f + static_cast<float>(size_weight)) / 100.0f;
-
-    auto const max_w = bounds.width();
-    auto const max_h = bounds.height();
-
-    auto const weighted_max_w = std::max(
-        static_cast<int>(min_w)
-      , static_cast<int>(max_w*scaler)
-    );
-
-    auto const weighted_max_h = std::max(
-        static_cast<int>(min_h)
-      , static_cast<int>(max_h*scaler)
-    );
-
-    auto w = random_uniform(random, min_w, weighted_max_w);
-    auto h = random_uniform(random, min_h, weighted_max_h);
-
-    w = std::min(w, max_w);
-    h = std::min(h, max_h);
-
-    return generate::bounded_rect(random, bounds, w, h);
+    //auto const w = generate::weighted_range(random, min_w, bounds.width(),  size_weight);
+    //auto const h = generate::weighted_range(random, min_h, bounds.height(), size_weight);
+    //TODO
+    return bounded_rect(random, bounds, min_w, min_h);
 }
 //==============================================================================
 point_t

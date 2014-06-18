@@ -12,6 +12,21 @@ namespace yama {
 namespace generate {
 
 ////////////////////////////////////////////////////////////////////////////////
+//! @return A random integer in [lower, upper] weighted toward one side.
+//!
+//! @param random Random number generator.
+//! @param range the range of values.
+//! @param weight for weight > 0 values are skewed toward range.upper.
+//!               for weight < 0 values are skewed toward range.lower.
+////////////////////////////////////////////////////////////////////////////////
+int weighted_range(
+    random_t&                     random
+  , closed_integral_interval<int> range
+  , closed_range<int, 100>        weight
+  , closed_range<int, 100>        variance
+);
+
+////////////////////////////////////////////////////////////////////////////////
 //! @return A random rect contained within @p bounds.
 //!
 //! @param random Random number generator.

@@ -139,6 +139,18 @@ public:
     ////////////////////////////////////////////////////////////////////////////
     std::pair<bool, rect_t> connect(random_t& random, node const& n);
 
+    std::vector<rect_t> get_regions() const {
+        std::vector<rect_t> result;
+
+        for (auto const& n : nodes_) {
+            if (n.is_leaf()) {
+                result.push_back(n.bounds);
+            }
+        }
+
+        return result;
+    }
+
     params_t            params_;
     std::vector<node>   nodes_;
     std::vector<rect_t> rooms_;

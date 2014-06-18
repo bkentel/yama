@@ -4,6 +4,69 @@
 
 using namespace yama;
 
+
+TEST_CASE("test distribution", "[generate]") {
+     yama::random_t random {1011};
+
+    constexpr int n = 2500000;
+
+    auto const range = yama::closed_integral_interval<> {0, 99};
+    constexpr int weight = 0;
+
+    auto const count = range.size() + 1;
+
+    auto result = std::vector<int>(count, 0);
+
+
+    for (auto i = 0; i < n; ++i) {
+        auto const value = generate::weighted_range(random, range, -100, -75);
+        result[value] += 1;
+    }
+
+    auto const print = [&](int value) {
+        auto const m = value / 800;
+        for (int i = 0; i < m; ++i) {
+            std::cout << "*";
+        }
+    };
+
+    for (auto i = 0; i < count; ++i) {
+        std::cout << "[" << i << "\t]";
+        print(result[i]);
+        std::cout << std::endl;
+    }
+}
+
+
+TEST_CASE("generate range value", "[generate]") {
+    yama::random_t random {1011};
+
+    constexpr int n = 10000;
+
+    constexpr int lower = 5;
+    constexpr int upper = 20;
+    constexpr int weight = 0;
+
+    std::vector<int> result (upper - lower + 1, 0);
+
+    auto const range = yama::closed_integral_interval<> {lower, upper};
+
+    for (auto i = 0; i < n; ++i) {
+        auto const value = generate::weighted_range(random, range, weight, 0);
+
+        REQUIRE(value >= lower);
+        REQUIRE(value <= upper);
+
+        auto const index = value - lower;
+        result[index] += 1;
+    }
+
+    for (auto const& i : result) {
+        REQUIRE(i > 0);
+    }
+
+}
+
 TEST_CASE("generate rects", "[generate]") {
     yama::random_t random {1011};
 
@@ -18,7 +81,7 @@ TEST_CASE("generate rects", "[generate]") {
     yama::rect_t const bounds {left, top, right, bottom};
 
     for (int i = 0; i < 100; ++i) {
-        auto const r = yama::generate::rect(random, bounds, min_w, min_h);
+        auto const r = yama::generate::bounded_rect(random, bounds, min_w, min_h);
 
         REQUIRE(r.width()  >= min_w);
         REQUIRE(r.height() >= min_h);

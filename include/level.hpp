@@ -14,8 +14,14 @@ namespace yama {
 class level {
 public:
     explicit level(random_t& random, map_size width, map_size height)
-        : map_ {bsp_layout{}.generate(random)}
+      : map_ {10, 10} //TODO fix
     {
+        bsp_layout::params_t p{};
+        p.room_size_weight = 100;
+
+        bsp_layout layout {p};
+        map_ = layout.generate(random);
+        regions_ = layout.get_regions();
     }
 
     void render(renderer& r) {
@@ -42,12 +48,18 @@ public:
                 r.fill_rect(x*16, y*16, 16, 16);
             }
         }
+
+        r.set_color(255, 0, 0);
+        for (auto const& region : regions_) {
+            r.draw_rect(region.left*16, region.top*16, region.width()*16, region.height()*16);
+        }
     }
 
     int width()  const { return map_.width(); }
     int height() const { return map_.height(); }
 private:
     map map_;
+    std::vector<rect_t> regions_;
 };
 
 } //namespace yama

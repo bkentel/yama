@@ -119,6 +119,8 @@ void bsp_layout_impl::split_node(random_t& random, node& n) {
 void bsp_layout_impl::generate_rooms(random_t& random) {
     BK_ASSERT(rooms_.empty());
 
+    std::vector<node*> nodes;
+
     for (auto& n : nodes_) {
         //internal node => next
         if (!n.is_leaf()) { continue; }
@@ -128,13 +130,14 @@ void bsp_layout_impl::generate_rooms(random_t& random) {
         //skip generation? => next
         if (!do_generate_room(random, bounds)) { continue; }
 
-        auto const room = generate_room(random, bounds);
+        nodes.push_back(&n);
+    }
 
-        std::cout << "reg  width=" << bounds.width() << " height=" << bounds.height()
-        << "\t\t-> room width=" << room.width()   << " height=" << room.height() << std::endl;
+    for (auto n : nodes) {
+        auto const room = generate_room(random, n->bounds);
 
         rooms_.emplace_back(room);
-        n.set_data(rooms_.size() - 1);
+        n->set_data(rooms_.size() - 1);
     }
 }
 //------------------------------------------------------------------------------
@@ -179,7 +182,14 @@ bool bsp_layout_impl::do_generate_room(
 //------------------------------------------------------------------------------
 yama::rect_t bsp_layout_impl::generate_room(random_t& random, yama::rect_t bounds) const {
     auto const& p = params_;
-    return generate::bounded_rect(random, bounds, p.room_w_range.lower, p.room_h_range.lower, p.room_size_weight, p.border_size);
+    return generate::bounded_rect(
+        random
+      , bounds
+      , p.room_w_range.lower
+      , p.room_h_range.lower
+      , p.room_size_weight
+      , p.border_size
+    );
 }
 //------------------------------------------------------------------------------
 void bsp_layout_impl::write_room(yama::rect_t const room) {
@@ -468,3 +478,6 @@ yama::map yama::bsp_layout::generate(random_t& random) {
     return impl_->generate(random);
 }
 //------------------------------------------------------------------------------
+std::vector<yama::rect_t> yama::bsp_layout::get_regions() const {
+    return impl_->get_regions();
+}

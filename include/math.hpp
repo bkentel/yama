@@ -61,6 +61,16 @@ struct closed_integral_interval {
         return yama::clamp(value, lower, upper);
     }
 
+    T size() const {
+        return upper - lower;
+    }
+
+    //TODO double
+    float operator*(float f) const {
+        BK_ASSERT(f >= 0.0f && f <= 1.0f);
+        return static_cast<float>(lower) + static_cast<float>(size()) * f;
+    }
+
     T lower;
     T upper;
 };
