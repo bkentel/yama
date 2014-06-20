@@ -8,6 +8,8 @@
 
 namespace yama {
 
+bool on_create_room(random_t& random, rect_t const& bounds);
+
 ////////////////////////////////////////////////////////////////////////////////
 //! BSP tree based map layout generator.
 //!

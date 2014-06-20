@@ -7,6 +7,8 @@
 
 #include "checked_value.hpp"
 
+#include "tile.hpp"
+
 namespace yama {
 
 //class map {
@@ -78,16 +80,42 @@ namespace yama {
 //};
 
 
+struct tile_data_base {
+    enum class tile_flags : uint8_t {
+        walkable = (1 << 1)
+      , seen     = (1 << 2)
+      , visible  = (1 << 3)
+    };
 
+    tile_flags flags;
+};
 
+template <tile_category Category>
+struct tile_data : tile_data_base {};
 
+template <>
+struct tile_data<tile_category::door> : tile_data_base {
+    enum class states : uint8_t {
+        open, closed, stuck, locked
+    };
+
+    states state;
+};
+
+template <>
+struct tile_data<tile_category::stair> : tile_data_base {
+    enum class types : uint8_t {
+        up, down
+    };
+
+    types type;
+};
 
 } //namespace yama
 
 ////////////////////////////////////////////////////////////////////////////////
 //! Entry point for the SDL application.
 ////////////////////////////////////////////////////////////////////////////////
-
 
 int SDL_main(int argc, char* argv[]) {
     yama::engine e;

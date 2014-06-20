@@ -14,10 +14,16 @@ namespace generate {
 ////////////////////////////////////////////////////////////////////////////////
 //! @return A random integer in [lower, upper] weighted toward one side.
 //!
-//! @param random Random number generator.
-//! @param range the range of values.
-//! @param weight for weight > 0 values are skewed toward range.upper.
-//!               for weight < 0 values are skewed toward range.lower.
+//! @param random
+//!     Random number generator.
+//! @param range
+//!     The closed range of values.
+//! @param weight
+//!    * For weight > 0 values are skewed toward range.upper.
+//!    * For weight < 0 values are skewed toward range.lower.
+//! @param variance
+//!    * For variance > 0 values have more variance.
+//!    * For variance < 0 values have less variance.
 ////////////////////////////////////////////////////////////////////////////////
 int weighted_range(
     random_t&                     random
@@ -29,12 +35,18 @@ int weighted_range(
 ////////////////////////////////////////////////////////////////////////////////
 //! @return A random rect contained within @p bounds.
 //!
-//! @param random Random number generator.
-//! @param bounds Bounds that contain the resulting rect.
-//! @param min_w Minimum width of the resulting rect.
-//! @param min_h Minimum height of the resulting rect.
+//! @param random
+//!     Random number generator.
+//! @param bounds
+//!     Bounds that contain the resulting rect.
+//! @param min_w
+//!      Minimum width of the resulting rect.
+//! @param min_h
+//!     Minimum height of the resulting rect.
+//! @param border_size
+//!     The amount of empty space to leave in the upper left of bounds.
 //!
-//! @pre bounds is normalized.
+//! @pre @p bounds is normalized.
 ////////////////////////////////////////////////////////////////////////////////
 rect_t
 uniform_bounded_rect(
@@ -48,16 +60,22 @@ uniform_bounded_rect(
 ////////////////////////////////////////////////////////////////////////////////
 //! @return A random rect contained within @p bounds.
 //!
-//! @param random Random number generator.
-//! @param bounds Bounds that contain the resulting rect.
-//! @param min_w Minimum width of the resulting rect.
-//! @param min_h Minimum height of the resulting rect.
-//! @param size_weight
-//!     Larger positive values generate larger average rects;
-//!     larger negative values generate smaller average rects.
-//! @param border_size Minimum height of the resulting rect.
+//! @param random
+//!     Random number generator.
+//! @param bounds
+//!     Bounds that contain the resulting rect.
+//! @param min_w
+//!      Minimum width of the resulting rect.
+//! @param min_h
+//!     Minimum height of the resulting rect.
+//! @param weight
+//!    * For weight > 0 values are skewed toward range.upper.
+//!    * For weight < 0 values are skewed toward range.lower.
+//! @param variance
+//!    * For variance > 0 values have more variance.
+//!    * For variance < 0 values have less variance.
 //!
-//! @pre bounds is normalized.
+//! @pre @p bounds is normalized.
 ////////////////////////////////////////////////////////////////////////////////
 rect_t
 weighted_bounded_rect(
@@ -76,7 +94,7 @@ weighted_bounded_rect(
 //! @param random Random number generator.
 //! @param bounds Bounds that contain the resulting point.
 //!
-//! @pre bounds is normalized.
+//! @pre @p bounds is normalized.
 ////////////////////////////////////////////////////////////////////////////////
 point_t
 bounded_point(
@@ -108,9 +126,7 @@ using split_result = std::tuple<split_type, rect_t, rect_t>;
 //! shortest dimension allowed before the rect must be split along the long dimension.
 //!
 //! @pre rect is normalized.
-//! @pre min_w >= 0.
-//! @pre min_h >= 0.
-//! @pre threshold_num >= 1
+//! @pre threshold_num >= 1 //TODO
 ////////////////////////////////////////////////////////////////////////////////
 split_type
 get_split_type(
@@ -131,8 +147,6 @@ get_split_type(
 //! @param min_h The minimum height of the resulting rects.
 //!
 //! @pre rect is normalized.
-//! @pre min_w >= 0.
-//! @pre min_h >= 0.
 ////////////////////////////////////////////////////////////////////////////////
 split_result
 split_rect(
