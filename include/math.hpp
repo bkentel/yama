@@ -35,6 +35,9 @@ template <typename T> struct get_value_type<T, false> {
 template <typename T>
 using get_value_type_t = typename detail::get_value_type<T, std::is_fundamental<T>::value>::type;
 
+template <typename T, typename U>
+using get_common_value_type_t = std::common_type_t<get_value_type_t<T>, get_value_type_t<U>>;
+
 ////////////////////////////////////////////////////////////////////////////////
 //! A closed integral interval.
 //!
@@ -74,6 +77,15 @@ struct closed_integral_interval {
     T lower;
     T upper;
 };
+
+template <typename T, typename U, typename R = get_common_value_type_t<T, U>>
+inline closed_integral_interval<R>
+make_closed_interval(T const lower, U const upper) {
+    R const a = lower;
+    R const b = upper;
+
+    return closed_integral_interval<R>{a, b};
+}
 
 using positive_interval = closed_integral_interval<positive<int>>;
 

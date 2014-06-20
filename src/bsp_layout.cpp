@@ -182,12 +182,13 @@ bool bsp_layout_impl::do_generate_room(
 //------------------------------------------------------------------------------
 yama::rect_t bsp_layout_impl::generate_room(random_t& random, yama::rect_t bounds) const {
     auto const& p = params_;
-    return generate::bounded_rect(
+    return generate::weighted_bounded_rect(
         random
       , bounds
       , p.room_w_range.lower
       , p.room_h_range.lower
       , p.room_size_weight
+      , p.room_size_variance
       , p.border_size
     );
 }

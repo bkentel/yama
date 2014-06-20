@@ -22,8 +22,8 @@ namespace generate {
 int weighted_range(
     random_t&                     random
   , closed_integral_interval<int> range
-  , closed_range<int, 100>        weight
-  , closed_range<int, 100>        variance
+  , closed_range<int, 100>        weight   = 0
+  , closed_range<int, 100>        variance = 0
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -37,11 +37,12 @@ int weighted_range(
 //! @pre bounds is normalized.
 ////////////////////////////////////////////////////////////////////////////////
 rect_t
-bounded_rect(
+uniform_bounded_rect(
     random_t&     random
   , rect_t        bounds
   , positive<int> min_w
   , positive<int> min_h
+  , positive<int> border_size = 0
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -59,13 +60,14 @@ bounded_rect(
 //! @pre bounds is normalized.
 ////////////////////////////////////////////////////////////////////////////////
 rect_t
-bounded_rect(
-    random_t&     random
-  , rect_t        bounds
-  , positive<int> min_w
-  , positive<int> min_h
-  , int           size_weight
-  , positive<int> border_size = 0
+weighted_bounded_rect(
+    random_t&              random
+  , rect_t                 bounds
+  , positive<int>          min_w
+  , positive<int>          min_h
+  , closed_range<int, 100> weight      = 0
+  , closed_range<int, 100> variance    = 0
+  , positive<int>          border_size = 0
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -112,11 +114,11 @@ using split_result = std::tuple<split_type, rect_t, rect_t>;
 ////////////////////////////////////////////////////////////////////////////////
 split_type
 get_split_type(
-    random_t& random
-  , rect_t    rect
-  , int       min_w     = 0
-  , int       min_h     = 0
-  , float     threshold = 1.0f
+    random_t&     random
+  , rect_t        rect
+  , positive<int> min_w     = 0
+  , positive<int> min_h     = 0
+  , float         threshold = 1.0f
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -134,11 +136,11 @@ get_split_type(
 ////////////////////////////////////////////////////////////////////////////////
 split_result
 split_rect(
-    random_t&  random
-  , rect_t     rect
-  , split_type type
-  , int        min_w = 0
-  , int        min_h = 0
+    random_t&     random
+  , rect_t        rect
+  , split_type    type
+  , positive<int> min_w = 0
+  , positive<int> min_h = 0
 );
 
 } //namespace generate

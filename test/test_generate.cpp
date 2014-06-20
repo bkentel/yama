@@ -81,7 +81,7 @@ TEST_CASE("generate rects", "[generate]") {
     yama::rect_t const bounds {left, top, right, bottom};
 
     for (int i = 0; i < 100; ++i) {
-        auto const r = yama::generate::bounded_rect(random, bounds, min_w, min_h);
+        auto const r = yama::generate::uniform_bounded_rect(random, bounds, min_w, min_h);
 
         REQUIRE(r.width()  >= min_w);
         REQUIRE(r.height() >= min_h);

@@ -3,6 +3,7 @@
 
 using namespace yama;
 
+//==============================================================================
 int generate::weighted_range(
     random_t&                           random
   , closed_integral_interval<int> const range
@@ -35,41 +36,18 @@ int generate::weighted_range(
 
     return static_cast<int>(std::round(a + delta * n));
 }
-
-//==============================================================================
-//rect_t
-//generate::bounded_rect(
-//    random_t&           random
-//  , rect_t        const bounds
-//  , positive<int> const min_w
-//  , positive<int> const min_h
-//) {
-//    BK_ASSERT(bounds);
-//
-//    auto const w = bounds.width();
-//    auto const h = bounds.height();
-//
-//    BK_ASSERT(w >= min_w);
-//    BK_ASSERT(h >= min_h);
-//
-//    auto const leeway_x = (w - min_w) / 2;
-//    auto const leeway_y = (h - min_h) / 2;
-//
-//    auto const left   = bounds.left   + random_uniform(random, 0, leeway_x);
-//    auto const top    = bounds.top    + random_uniform(random, 0, leeway_y);
-//    auto const right  = bounds.right  - random_uniform(random, 0, leeway_x);
-//    auto const bottom = bounds.bottom - random_uniform(random, 0, leeway_y);
-//
-//    return {left, top, right, bottom};
-//}
 //==============================================================================
 rect_t
-generate::bounded_rect(
+generate::uniform_bounded_rect(
     random_t&           random
-  , rect_t        const bounds
+  , rect_t              bounds
   , positive<int> const w
   , positive<int> const h
+  , positive<int> const border_size
 ) {
+    bounds.left += border_size;
+    bounds.top  += border_size;
+
     auto const max_w = bounds.width();
     auto const max_h = bounds.height();
 
@@ -89,21 +67,25 @@ generate::bounded_rect(
 }
 
 rect_t
-generate::bounded_rect(
-    random_t&           random
-  , rect_t              bounds
-  , positive<int> const min_w
-  , positive<int> const min_h
-  , int           const size_weight
-  , positive<int> const border_size
+generate::weighted_bounded_rect(
+    random_t&                    random
+  , rect_t                       bounds
+  , positive<int>          const min_w
+  , positive<int>          const min_h
+  , closed_range<int, 100> const weight
+  , closed_range<int, 100> const variance
+  , positive<int>          const border_size
 ) {
     bounds.left += border_size;
     bounds.top  += border_size;
 
-    //auto const w = generate::weighted_range(random, min_w, bounds.width(),  size_weight);
-    //auto const h = generate::weighted_range(random, min_h, bounds.height(), size_weight);
-    //TODO
-    return bounded_rect(random, bounds, min_w, min_h);
+    auto const max_w = bounds.width();
+    auto const max_h = bounds.height();
+
+    auto const w = weighted_range(random, make_closed_interval(min_w, max_w), weight, variance);
+    auto const h = weighted_range(random, make_closed_interval(min_h, max_h), weight, variance);
+
+    return uniform_bounded_rect(random, bounds, positive<int>{w}, positive<int>{h});
 }
 //==============================================================================
 point_t
@@ -119,14 +101,12 @@ generate::bounded_point(
 //==============================================================================
 generate::split_type
 generate::get_split_type(
-    random_t&       random
-  , rect_t    const rect
-  , int       const min_w
-  , int       const min_h
-  , float     const threshold
+    random_t&           random
+  , rect_t        const rect
+  , positive<int> const min_w
+  , positive<int> const min_h
+  , float         const threshold
 ) {
-    BK_ASSERT(min_w >= 0);
-    BK_ASSERT(min_h >= 0);
     BK_ASSERT(threshold >= 1.0f);
 
     auto const w = rect.width();
@@ -166,11 +146,11 @@ generate::get_split_type(
 //==============================================================================
 generate::split_result
 generate::split_rect(
-    random_t&  random
-  , rect_t     const rect
-  , split_type       type
-  , int        const min_w
-  , int        const min_h
+    random_t&           random
+  , rect_t        const rect
+  , split_type    const type
+  , positive<int> const min_w
+  , positive<int> const min_h
 ) {
     BK_ASSERT(min_w >= 0);
     BK_ASSERT(min_h >= 0);
