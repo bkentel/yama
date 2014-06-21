@@ -12,72 +12,40 @@ class bsp_layout::impl_t : public bsp_layout_impl {
 public:
     using bsp_layout_impl::bsp_layout_impl;
 };
+
 //==============================================================================
-bsp_layout_impl::params_t
-bsp_layout_impl::validate(params_t const params) {
-    auto const& p = params;
-
-    //BK_ASSERT(p.map_w >= 16);
-    //BK_ASSERT(p.map_h >= 16);
-
-    //BK_ASSERT(p.min_room_w >= 0);
-    //BK_ASSERT(p.min_room_h >= 0);
-
-    //BK_ASSERT(p.border >= 0);
-
+// yama::detail::bsp_layout_impl
+//==============================================================================
+bsp_layout_impl::params_t&
+bsp_layout_impl::validate(params_t& params) {
     return params;
 }
 //------------------------------------------------------------------------------
-bsp_layout_impl::bsp_layout_impl(params_t const Params)
-  : params_ {validate(Params)}
+bsp_layout_impl::bsp_layout_impl(params_t params)
+  : params_ {validate(params)}
   , nodes_ {}
-  , rooms_ {}
-  , map_ (params_.map_w, params_.map_h)
 {
 }
 //------------------------------------------------------------------------------
 void bsp_layout_impl::clear() {
     nodes_.clear();
-    rooms_.clear();
-    map_.clear();
 }
 //------------------------------------------------------------------------------
-
-namespace {
-yama::rect_t shrink_rect(yama::rect_t const r) {
-    BK_ASSERT(r.width()  >= 2);
-    BK_ASSERT(r.height() >= 2);
-
-    return {r.left + 1, r.top + 1, r.right - 1, r.bottom - 1};
-}
-}
-
-yama::map bsp_layout_impl::generate(random_t& random) {
+void bsp_layout_impl::generate(
+    random_t&           random
+  , yama::map&          map
+  , on_create_room_t&   on_create_room
+  , on_connect_rooms_t& on_connect_rooms
+) {
     clear();
-    nodes_.push_back(node {rect_t {0, 0, params_.map_w, params_.map_h}});
+
+    auto const map_rect = rect_t {0, 0, map.width(), map.height()};
+    nodes_.push_back(node_t {map_rect});
 
     generate_tree(random);
-    generate_rooms(random);
+    generate_rooms(random, map, on_create_room);
 
-    for (auto const& room : rooms_) {
-        write_room(room);
-    }
-
-    connect(random, nodes_[0]);
-
-    auto const first_room = shrink_rect(rooms_.front());
-    auto const last_room  = shrink_rect(rooms_.back());
-
-    auto const p0 = generate::bounded_point(random, first_room);
-    auto const p1 = generate::bounded_point(random, last_room);
-
-    map_.set<map_property::category>(p0, tile_category::stair);
-    map_.set<map_property::category>(p1, tile_category::stair);
-
-    auto result = std::move(map_);
-    map_ = map {params_.map_w, params_.map_h};
-
-    return result;
+    connect(random, on_connect_rooms, nodes_[0]);
 }
 //------------------------------------------------------------------------------
 void bsp_layout_impl::generate_tree(random_t& random) {
@@ -89,12 +57,12 @@ void bsp_layout_impl::generate_tree(random_t& random) {
     }
 }
 //------------------------------------------------------------------------------
-void bsp_layout_impl::split_node(random_t& random, node& n) {
-    BK_ASSERT(n.is_empty());
+void bsp_layout_impl::split_node(random_t& random, node_t& node) {
+    BK_ASSERT(node.is_empty());
 
     auto const min_w = params_.region_w_range.lower;
     auto const min_h = params_.region_h_range.lower;
-    auto const rect  = n.bounds;
+    auto const rect  = node.bounds;
 
     if (!do_split(random, rect)) {
         return;
@@ -109,35 +77,24 @@ void bsp_layout_impl::split_node(random_t& random, node& n) {
     auto const first  = std::get<1>(result);
     auto const second = std::get<2>(result);
 
-    n.first  = nodes_.size() + 0;
-    n.second = nodes_.size() + 1;
+    node.first  = nodes_.size() + 0;
+    node.second = nodes_.size() + 1;
 
-    nodes_.push_back(node {first});
-    nodes_.push_back(node {second});
+    nodes_.push_back(node_t {first});
+    nodes_.push_back(node_t {second});
 }
 //------------------------------------------------------------------------------
-void bsp_layout_impl::generate_rooms(random_t& random) {
-    BK_ASSERT(rooms_.empty());
+void bsp_layout_impl::generate_rooms(
+    random_t&         random
+  , yama::map&        map
+  , on_create_room_t& on_create_room
+) {
+    for (auto& node : nodes_) {
+        if (!node.is_leaf()) {
+            continue; //internal node => next
+        }
 
-    std::vector<node*> nodes;
-
-    for (auto& n : nodes_) {
-        //internal node => next
-        if (!n.is_leaf()) { continue; }
-
-        auto const& bounds = n.bounds;
-
-        //skip generation? => next
-        if (!do_generate_room(random, bounds)) { continue; }
-
-        nodes.push_back(&n);
-    }
-
-    for (auto n : nodes) {
-        auto const room = generate_room(random, n->bounds);
-
-        rooms_.emplace_back(room);
-        n->set_data(rooms_.size() - 1);
+        on_create_room(random, map, node.bounds);
     }
 }
 //------------------------------------------------------------------------------
@@ -426,24 +383,25 @@ bsp_layout_impl::corridor_transform(
 //------------------------------------------------------------------------------
 std::pair<bool, yama::rect_t>
 bsp_layout_impl::connect(
-    random_t&   random
-  , node const& n
+    random_t&           random
+  , on_connect_rooms_t& on_connect_rooms
+  , node_t const&       node
 ) {
     //base case
-    if (n.is_leaf()) {
+    if (node.is_leaf()) {
         //if not empty, return the room's rect;
         //otherise return the region's bounds
-        auto const has_room = !n.is_empty();
-        return {has_room, has_room ? rooms_[n.get_data()] : n.bounds};
+        auto const has_room = !node.is_empty();
+        return {has_room, has_room ? rooms_[node.get_data()] : n.bounds};
     }
 
     //recurse
-    auto const a = connect(random, nodes_[n.first]);
-    auto const b = connect(random, nodes_[n.second]);
+    auto const a = connect(random, on_connect_rooms, nodes_[node.first]);
+    auto const b = connect(random, on_connect_rooms, nodes_[node.second]);
 
     if (a.first && b.first) {
         //both children are connected; connect the children themselves
-        do_connect(random, n.bounds, a.second, b.second);
+        do_connect(random, node.bounds, a.second, b.second);
         //choose a random child to return as the result
         return {true, random_bool(random) ? a.second : b.second};
     } else if (a.first && !b.first) {
@@ -455,9 +413,11 @@ bsp_layout_impl::connect(
     }
 
     //both children are empty
-    return {false, n.bounds};
+    return {false, node.bounds};
 }
 
+//==============================================================================
+// yama::bsp_layout
 //==============================================================================
 bsp_layout::bsp_layout(params_t p)
   : impl_ {std::make_unique<impl_t>(p)}
@@ -467,18 +427,14 @@ bsp_layout::bsp_layout(params_t p)
 bsp_layout::~bsp_layout() {
 }
 //------------------------------------------------------------------------------
-bsp_layout::params_t bsp_layout::params() const {
-    return impl_->params();
+
+void yama::bsp_layout::generate(
+    random_t&           random
+  , yama::map&          map
+  , on_create_room_t&   on_create_room
+  , on_connect_rooms_t& on_connect_rooms
+) {
+    impl_->generate(random, map, on_create_room, on_connect_rooms);
 }
 //------------------------------------------------------------------------------
-void bsp_layout::set_params(params_t const p) {
-    impl_->set_params(p);
-}
-//------------------------------------------------------------------------------
-yama::map yama::bsp_layout::generate(random_t& random) {
-    return impl_->generate(random);
-}
-//------------------------------------------------------------------------------
-std::vector<yama::rect_t> yama::bsp_layout::get_regions() const {
-    return impl_->get_regions();
-}
+

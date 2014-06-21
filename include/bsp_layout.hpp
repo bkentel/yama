@@ -8,8 +8,6 @@
 
 namespace yama {
 
-bool on_create_room(random_t& random, rect_t const& bounds);
-
 ////////////////////////////////////////////////////////////////////////////////
 //! BSP tree based map layout generator.
 //!
@@ -17,14 +15,26 @@ bool on_create_room(random_t& random, rect_t const& bounds);
 ////////////////////////////////////////////////////////////////////////////////
 class bsp_layout {
 public:
+    using on_create_room_t = std::function<
+        bool               //!< true if a room was generated; false otherwise.
+        (random_t&  random //!< the random number generator to use.
+       , yama::map& map    //!< the map to write to.
+       , rect_t     bounds //!< the bounds for the room.
+    )>;
+
+    using on_connect_rooms_t = std::function<
+        bool               //!< true if a connection was made; false otherwise.
+        (random_t&  random //!< the random number generator to use.
+       , yama::map& map    //!< the map to write to.
+       , rect_t     first  //!< the bounds for the first room.
+       , rect_t     second //!< the bounds for the second room.
+    )>;
+
     ////////////////////////////////////////////////////////////////////////////
     //! BSP layout generation parameters.
     ////////////////////////////////////////////////////////////////////////////
     struct params_t {
         params_t() {}
-
-        map_size map_w {64}; //!< Generated map width.
-        map_size map_h {64};  //!< Generated map height.
 
         positive_interval room_w_range {4, 25}; //!< The min/max range for room width.
         positive_interval room_h_range {4, 25}; //!< The min/max range for room height.       
@@ -56,12 +66,12 @@ public:
     explicit bsp_layout(params_t p = params_t {});
     ~bsp_layout();
 
-    params_t params() const;
-    void set_params(params_t p = params_t {});
-
-    map generate(random_t& random);
-
-    std::vector<rect_t> get_regions() const;
+    void generate(
+        random_t&           random
+      , yama::map&          map
+      , on_create_room_t&   on_create_room
+      , on_connect_rooms_t& on_connect_rooms
+    );
 private:
     class impl_t;
     std::unique_ptr<impl_t> impl_;

@@ -13,6 +13,11 @@
 #include <string>
 #include <ratio>
 
+//boost
+#include <boost/predef.h>
+#include <boost/logic/tribool.hpp>
+
+//libs
 #include <SDL.h>
 
 #define GLEW_STATIC

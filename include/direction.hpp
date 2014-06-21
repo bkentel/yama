@@ -9,6 +9,11 @@ enum class direction {
     here, nw, n, ne, w, e, sw, s, se, up, down
 };
 
+enum class cardinal_direction {
+    here, n, w, e, s 
+};
+
+
 struct direction_offsets {
     //                         here, nw,  n, ne,  w, e, sw, s, se, up, down
     std::array<int, 11> x {{0,    -1,  0,  1, -1, 1, -1, 0,  1,  0, 0}};

@@ -16,24 +16,29 @@ namespace detail {
 class bsp_layout_impl {
 public:
     using params_t = bsp_layout::params_t;
+    using on_create_room_t = bsp_layout::on_create_room_t;
+    using on_connect_rooms_t = bsp_layout::on_connect_rooms_t;
 
-    struct node {
+    struct node_t {
         using index_t = int;
-        static index_t const EMPTY_VALUE = -1;
 
-        explicit node(rect_t const Bounds)
-          : first  {EMPTY_VALUE}
-          , second {EMPTY_VALUE}
+        enum : index_t {
+            empty_value = index_t {-1}
+        };
+
+        explicit node_t(rect_t const Bounds)
+          : first  {empty_value}
+          , second {empty_value}
           , bounds {Bounds}
         {
         }
 
         bool is_leaf() const {
-            return first == EMPTY_VALUE;
+            return first == empty_value;
         }
 
         bool is_empty() const {
-            return first == EMPTY_VALUE && second == EMPTY_VALUE;
+            return first == empty_value && second == empty_value;
         }
 
         void set_data(index_t i) {
@@ -51,26 +56,21 @@ public:
         rect_t  bounds;
     };
 
-    static params_t validate(params_t params);
+    static params_t& validate(params_t& params);
 public:
     //! construct with a (default) param set.
     explicit bsp_layout_impl(params_t params = params_t {});
-
-    //! get the current param set.
-    params_t params() const {
-        return params_;
-    }
-
-    //! set the current param set.
-    void set_params(params_t const p) {
-        params_ = validate(p);
-    }
 
     //! reset internal state and keep the current param set.
     void clear();
 
     //! generate a new map
-    map generate(random_t& random);
+    void generate(
+        random_t&           random
+      , yama::map&          map
+      , on_create_room_t&   on_create_room
+      , on_connect_rooms_t& on_connect_rooms
+    );
 
     //! decide whether to split a node.
     bool do_split(random_t& random, rect_t bounds) const;
@@ -79,7 +79,7 @@ public:
     bool do_generate_room(random_t& random, rect_t bounds) const;
 
     //! split a node into sub nodes
-    void split_node(random_t& random, node& n);
+    void split_node(random_t& random, node_t& node);
 
     //! generate a room.
     rect_t generate_room(random_t& random, rect_t bounds) const;
@@ -88,7 +88,11 @@ public:
     void write_room(rect_t room);
 
     //! fill the bsp tree with rooms
-    void generate_rooms(random_t& random);
+    void generate_rooms(
+        random_t&         random
+      , yama::map&        map
+      , on_create_room_t& on_create_room
+    );
 
     //! create the bsp tree
     void generate_tree(random_t& random);
@@ -137,7 +141,11 @@ public:
     //! @return {has_room, bounds} where @p bounds are the room itself if has_room
     //! is true, otherise @p bounds are the region's bounds.
     ////////////////////////////////////////////////////////////////////////////
-    std::pair<bool, rect_t> connect(random_t& random, node const& n);
+    std::pair<bool, rect_t> connect(
+        random_t&           random
+      , on_connect_rooms_t& on_connect_rooms
+      , node_t const&       node
+    );
 
     std::vector<rect_t> get_regions() const {
         std::vector<rect_t> result;
@@ -152,9 +160,9 @@ public:
     }
 
     params_t            params_;
-    std::vector<node>   nodes_;
-    std::vector<rect_t> rooms_;
-    yama::map           map_;
+    std::vector<node_t> nodes_;
+    //std::vector<rect_t> rooms_;
+    //yama::map           map_;
 };
 
 } //namespace detail
