@@ -135,6 +135,7 @@
   <ItemGroup>
     <ClCompile Include="src\assert.cpp" />
     <ClCompile Include="src\bsp_layout.cpp" />
+    <ClCompile Include="src\bsp_layout_dev.cpp" />
     <ClCompile Include="src\client.cpp" />
     <ClCompile Include="src\engine.cpp" />
     <ClCompile Include="src\generate.cpp" />
@@ -178,6 +179,7 @@
     <ClInclude Include="include\algorithm.hpp" />
     <ClInclude Include="include\assert.hpp" />
     <ClInclude Include="include\bsp_layout.hpp" />
+    <ClInclude Include="include\bsp_layout_dev.hpp" />
     <ClInclude Include="include\checked_value.hpp" />
     <ClInclude Include="include\client.hpp" />
     <ClInclude Include="include\commands.hpp" />

@@ -152,9 +152,6 @@ generate::split_rect(
   , positive<int> const min_w
   , positive<int> const min_h
 ) {
-    BK_ASSERT(min_w >= 0);
-    BK_ASSERT(min_h >= 0);
-
     auto const w = rect.width();
     auto const h = rect.height();
 
