@@ -25,7 +25,8 @@ namespace generate {
 //!    * For variance > 0 values have more variance.
 //!    * For variance < 0 values have less variance.
 ////////////////////////////////////////////////////////////////////////////////
-int weighted_range(
+int
+weighted_range(
     random_t&                     random
   , closed_integral_interval<int> range
   , closed_range<int, 100>        weight   = 0

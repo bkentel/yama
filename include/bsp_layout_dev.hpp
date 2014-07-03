@@ -41,8 +41,8 @@ public:
     void generate(
         random_t& random
       , yama::map& map
-      , room_generator& generator
-      , region_connector& connector
+      , room_generator generator
+      , region_connector connector
     ) {
         split_(random, map.width(), map.height());
 
@@ -89,6 +89,9 @@ private:
             }
 
             auto const result = split_(random, bounds);
+            if (std::get<0>(result) == generate::split_type::none) {
+                continue;
+            }
 
             nodes_.emplace_back(std::get<1>(result));
             nodes_.emplace_back(std::get<2>(result));
@@ -113,8 +116,8 @@ private:
     }
 
     static generate::split_result split_(random_t& random, rect_t const bounds) {
-        auto const min_w     = 4;
-        auto const min_h     = 4;
+        auto const min_w     = 10;
+        auto const min_h     = 10;
         auto const threshold = 1.0f;
 
         auto const type = generate::get_split_type(random, bounds, min_w, min_h, threshold);
@@ -130,6 +133,31 @@ private:
         }
 
         return node.bounds;
+    }
+
+    bool can_dig_corridor(yama::map const& map, grid_position_t const p) {
+        auto const get = [&](int dx, int dy) {
+             return map.get<map_property::category>(p.x + dx, p.y + dy) == tile_category::wall;
+        };
+
+        // neighbors
+        // [0 1 2]
+        // [3 4 5]
+        // [6 7 8]
+        bool const n[] = {
+            get(-1, -1), get( 0, -1), get( 1, -1),
+            get(-1,  0), get( 0,  0), get( 1,  0),
+            get(-1,  1), get( 0,  1), get( 1,  1),
+        };
+
+        auto const ok =
+            (!n[4])
+         || (!(n[1] && n[3]) || n[0])
+         && (!(n[1] && n[5]) || n[2])
+         && (!(n[3] && n[7]) || n[6])
+         && (!(n[5] && n[7]) || n[8]);
+
+        return ok;
     }
 
     std::vector<node_>  nodes_;

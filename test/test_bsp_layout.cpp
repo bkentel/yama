@@ -3,9 +3,31 @@
 #include <catch/catch.hpp>
 
 #include "detail/bsp_layout_impl.hpp"
+#include "bsp_layout_dev.hpp"
 
 using bsp_layout_impl = yama::detail::bsp_layout_impl;
 using yama::rect_t;
+
+TEST_CASE("bsp_layout_regions", "[bsp_layout]") {
+    yama::random_t random {1984};
+
+    auto const gen_room = [&](yama::bsp_layout_dev::region_id id, yama::rect_t region) {
+        yama::generate::weighted_bounded_rect(random, region, 4, 4);
+
+        return true;
+    };
+
+    auto const connector = [](yama::rect_t a, yama::rect_t b) {
+        return true;
+    };
+
+    
+
+    yama::map            map {100, 100};
+    yama::bsp_layout_dev layout;
+
+    layout.generate(random, map, gen_room, connector);
+}
 
 //TEST_CASE("bsp_layout_regions", "[bsp_layout]") {
 //    yama::random_t random {1002};

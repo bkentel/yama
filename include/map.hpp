@@ -95,4 +95,22 @@ map::get<map_property::category>(grid_position_t const p) const {
     return get_category_(p.x, p.y);
 }
 
+//TODO
+//move to another file
+namespace generate {
+
+void simple_room(random_t& random, yama::map& map, rect_t const region) {
+    auto const rect = generate::weighted_bounded_rect(random, region, 4, 4);
+
+    for_each_xy(rect, [&](int x, int y) {
+        auto const type = rect.is_border(x, y)
+          ? tile_category::wall
+          : tile_category::floor;
+
+        map.set<map_property::category>(x, y, type);
+    });
+}
+
+} //namespace generate
+
 } //namespace yama

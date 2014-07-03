@@ -103,7 +103,7 @@ template <typename T, typename F>
 void for_each_xy(axis_aligned_rect<T> rect, F function) {
     for (auto yi = rect.top; yi < rect.bottom; ++yi) {
         for (auto xi = rect.left; xi < rect.right; ++xi) {
-            function(grid_position_t {xi, yi});
+            function(xi, yi);
         }
     }
 }
